@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    <title>合成表情包</title>
+
+    <!--http://www.html5rocks.com/en/mobile/mobifying/-->
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,maximum-scale=1" />
+
+    <!--https://developer.apple.com/library/safari/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- force webkit on 360 -->
+    <meta name="renderer" content="webkit" />
+    <meta name="force-rendering" content="webkit" />
+    <!-- force edge on IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <!-- force full screen on some browser -->
+    <meta name="full-screen" content="yes" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="360-fullscreen" content="true" />
+
+    <!-- force screen orientation on some browser -->
+    <meta name="screen-orientation" content="" />
+    <meta name="x5-orientation" content="">
+
+    <!--fix fireball/issues/3568 -->
+    <!--<meta name="browsermode" content="application">-->
+    <meta name="x5-page-mode" content="app">
+
+    <!--<link rel="apple-touch-icon" href=".png" />-->
+    <!--<link rel="apple-touch-icon-precomposed" href=".png" />-->
+
+
+    <!-- <script>
+        pushHistory();
+        window.addEventListener("popstate", function(e) {
+
+        }, false);
+        function pushHistory() {
+            var state = {
+                title: "",
+                url: window.location.href
+            };
+            window.history.pushState(state, state.title, state.url);
+        }
+    </script> -->
+    <!--  <script type="text/javascript">
+        var agent = navigator.userAgent.toLowerCase();
+        if(agent.indexOf("qbwebviewtype") > 0) {
+           location.href = "http://g.fromgame.com/game/462/";
+        }
+    </script> -->
+
+	<script src="jquery-3.5.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style-mobile.css" />
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/table.css" type="text/css" />
+</head>
+
+<body style="margin: 0; background: #ddd;" align="center">
+    <div style="align:center;display: none"><img src="res/share.jpg" width="10%" /></div>
+
+    <div id="canvasDiv" style="width:100%;height:100%;">
+        <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
+        <div id="block-Box" style="display:block;width:100%;height:100%;"></div>
+    </div>
+
+
+
+    <div id="adContainer" style="display:block;position: absolute;top:0px;left: 0px;width:100%;height:100%;z-index:9999;">
+		<div class="lunbo_div">
+			<span class="close" id="close1" style="z-index:99;">x</span>
+			<div>
+				<img class="cup" src="./images/cup.png" />
+				<span class="span_bm">
+					<p class="today_title">您的分数
+					<span class="totady_pers" id="myscore" style="font-size:24px;color:yellow;">0</span>
+					<br/>
+					<button class="button blue uploadbtn">上传分数</button>
+					</p>
+				</span>
+				<span class="span_bm2">
+					<p class="today_title">您已击败全球
+					<br/>
+					<span class="totady_pers" id="myrank" style="font-size:24px;color:yellow;">0</span>
+					%的玩家
+					</p>
+				</span>
+			</div>
+			<div id="bm_content" class="bm_content">
+				<table class="table table-condensed ">
+					<thead style="background-color: #eeeeee; ">
+						<tr>
+							<th style=" width: 15%;min-width:40px; text-align: center;">排名</th>
+							<th style=" width: 25%;min-width:60px; text-align: center;">昵称</th>
+							<th style="width: 20%;min-width:40px; text-align: center;">分数</th>
+							<th style=" width: 40%;min-width:60px; text-align: center;">时间</th>
+						</tr>
+					</thead>
+					<tbody id="tb1"></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div id="inputname" style="display:none;position: absolute;top:0px;left: 20%;width:60%;height:100px;background-color:#eeeeee;z-index:10000;border-radius: 10px;">
+		<span class="close" id="close2" style="font-size: 20px;top:-2px;">x</span>
+		<p style="font-weight:bold;">上传分数</p>
+		<div>
+			<input type="text" id="myname" value="" style="width:90%;border-radius: 5px;" placeholder="输入昵称"/>
+			<button class="button gray cancelbtn">取消</button>
+			<button class="button green confirmbtn">确认</button>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		var mid = 0;//初始mid为0
+		function uploadMyScore(score){
+			document.getElementById("myscore").innerHTML = score;
+
+			if(score>0){
+			$.ajax({
+			  url: "/api/User/insertUser?score="+score,
+			  jsonp: "callback",
+			  dataType: "json",
+			  success: function(result) {
+			   console.info(result);
+			   if(result.code==200){
+				   console.info("添加成功");
+				   mid=result.data.mid;
+				   document.getElementById("myrank").innerHTML = parseInt(parseFloat(result.data.ranknum)*100);
+				   document.getElementById("adContainer").style.display = "block";
+				   }else{
+				   console.info("添加失败");
+				   }
+			  },
+			  error: function(data) {
+				//alert("请求出错");
+				console.info(data);
+			  }
+			});
+		}
+		}
+	</script>
+
+    <div id="loadingText" style="width:100%;display: none;text-align:center;position:absolute;top:45%;z-index:10000;font-size:20px;color:#f99f0a">
+        loading......0%
+    </div>
+
+    <div id="splash">
+        <!-- <div class="progress-bar stripes"> -->
+        <!-- <span style="width: 0%"></span> -->
+        <!-- </div> -->
+    </div>
+
+    <div id="loadingImg" style="top:45%;width: 100%;position:absolute; ">
+        <img src="res/loading.gif" width="7%" height="7%" />
+    </div>
+
+
+
+
+    <!--<div align="center" style="font-size: 10px;color: dimgrey">advertisement</div>-->
+
+
+    <script src="src/settings.js" charset="utf-8"></script>
+
+    <script type="text/javascript">
+        var preloader;
+        var adCompleteFlag = false;
+        var resCompleteFlag = false;
+
+        var adEndComplete = false;
+        var resEndComplete = false;
+
+        judgeLanTitle();
+
+        function judgeLanTitle() {
+
+            //        console.log("window.navigator.language",window.navigator.language);
+
+            if (window.navigator.language == "zh-CN" || window.navigator.language == "zh-cn") {
+                document.title = "合成表情包";
+            } else if (window.navigator.language == "zh-TW") {
+                document.title = "合成表情包";
+            } else if (window.navigator.language == "zh-HK") {
+                document.title = "合成表情包";
+            } else if (window.navigator.language == "ko-KR") {
+                document.title = "작은 놀이：큰 수박 을 합성 하 다";
+            } else if (window.navigator.language == "ja-JP") {
+                document.title = "ミニゲーム：合成スイカ";
+            } else if (window.navigator.language == "th-TH") {
+                document.title = "เกมเล็กๆ：แตงโมสังเคราะห์";
+            } else {
+                document.title = "Little game：Synthetic watermelon";
+            }
+
+
+        }
+
+        var loadintT = document.getElementById("loadingText");
+        var loadintGif = document.getElementById("loadingImg")
+        setTimeout(function() {
+            loadintGif.remove();
+            loadintT.style.display = ""
+            updateLabView(0.1);
+        }, 1 * 1000)
+
+        window.timer = null;
+        window.tempSeconds = 1;
+        window.loadData = {};
+        loadData.completedCount = 0;
+        loadData.totalCount = 0;
+
+        onload();
+
+        function onload() {
+            var winHeight = document.documentElement.clientHeight;
+            document.getElementById("canvasDiv").style.height = winHeight + "px";
+        };
+        window.onload = function() {
+            document.getElementById("block-Box").style.display = "none";
+        }
+
+        function updateLabView(t) {
+            if (timer != null) {
+                clearInterval(timer);
+            }
+            timer = setInterval(function() {
+                tempSeconds++;
+                actualTotal();
+                var loadintT = document.getElementById("loadingText")
+                if (!loadintT) {
+                    return;
+                }
+                loadintT.innerHTML = 'loading......' + parseInt(tempSeconds) + '%';
+
+                switch (tempSeconds) {
+                    case 20:
+                        updateLabView(0.2);
+                        break;
+                    case 40:
+                        updateLabView(0.3);
+                        break;
+                    case 60:
+                        updateLabView(0.4);
+                        break;
+                    case 96:
+                        updateLabView(5);
+                        break;
+                    case 97:
+                        updateLabView(10);
+                        break;
+                    case 98:
+                        updateLabView(50);
+                        break;
+                    case 99:
+                        updateLabView(100);
+                        break;
+                    default:
+                        if (tempSeconds >= 80 && tempSeconds < 96) {
+                            updateLabView(t + 0.1);
+                        }
+                        break;
+                }
+                if (tempSeconds > 100) {
+                    clearInterval(timer);
+                    tempSeconds = 100
+                    loadintT.innerHTML = 'loading......' + parseInt(tempSeconds) + '%';
+                }
+            }, t * 1000);
+        }
+
+        function actualTotal() {
+            var percent = parseInt(100 * loadData.completedCount / loadData.totalCount);
+            if (percent > tempSeconds && loadData.totalCount > 1) {
+                tempSeconds = percent;
+            }
+        }
+
+
+        /*setTimeout("ShowBannerAD()","2000");*/
+    </script>
+
+
+
+
+
+    <script src="src/settings.js" charset="utf-8"></script>
+
+    <script src="main.js" charset="utf-8"></script>
+
+
+    <script type="text/javascript">
+        (function() {
+            // open web debugger console
+            if (typeof VConsole !== 'undefined') {
+                window.vConsole = new VConsole();
+            }
+
+            var splash = document.getElementById('splash');
+            splash.style.display = 'block';
+
+
+            console.log("indexlTextTTTT");
+
+            var cocos2d = document.createElement('script');
+            cocos2d.async = true;
+            cocos2d.src = window._CCSettings.debug ? 'cocos2d-js.js' : 'cocos2d-js-min.js';
+
+            var engineLoaded = function() {
+                document.body.removeChild(cocos2d);
+                cocos2d.removeEventListener('load', engineLoaded, false);
+                window.boot();
+            };
+            cocos2d.addEventListener('load', engineLoaded, false);
+            document.body.appendChild(cocos2d);
+
+        })();
+    </script>
+
+<script>
+
+    ; (function ($) {
+		var myClientHeight = document.documentElement.clientHeight;
+		var myClientWidth = document.documentElement.clientWidth;
+        var box = document.getElementById("bm_content");
+        var l1 = document.getElementById("tb1");
+        getRanks();
+		$("#close1").click(function() {
+			document.getElementById("adContainer").style.display = "none";
+			document.getElementById("inputname").style.display = "none";
+		});
+		$("#close2").click(function() {
+			document.getElementById("inputname").style.display = "none";
+		});
+		$(".cancelbtn").click(function() {
+			document.getElementById("inputname").style.display = "none";
+		});
+		$(".uploadbtn").click(function() {
+			if(mid==0){
+				alert("请游戏结束后再上传！");
+			}else{
+				document.getElementById("inputname").style.display = "block";
+			}
+		});
+		$("#adContainer").css('top',(myClientHeight/2-195)+"px");
+		$("#inputname").css('top',(myClientHeight/2)+"px");
+
+		//确认上传并修改昵称
+		$(".confirmbtn").click(function() {
+			//更新接口
+			console.info("mid="+mid+"&name="+$('#myname').val());
+			if(mid!=0 && $('#myname').val()){
+				$.ajax({
+				  url: "/api/User/updateUser?mid="+mid+"&name="+$('#myname').val(),
+				  jsonp: "callback",
+				  dataType: "json",
+				  success: function(result) {
+				   console.info(result);
+				   if(result.code==200){
+				   document.getElementById("inputname").style.display = "none";
+				   getRanks();
+					//this.RestartGame();
+					mid=0;
+				   }else{
+				   alert("上传失败");
+				   }
+				  },
+				  error: function(data) {
+					//alert("请求出错");
+					console.info(data);
+				  }
+				});
+			}else{
+				alert("操作有误");
+			}
+
+		});
+
+       function getRanks() {
+			$.ajax({
+			  url: "/api/User/getUsers",
+			  jsonp: "callback",
+			  dataType: "json",
+			  success: function(result) {
+			   console.info(result);
+			   var product = RenderList(result.data);
+				l1.innerHTML = product;
+			  },
+			  error: function(data) {
+				//alert("请求出错");
+				console.info(data);
+			  }
+			});
+
+        }
+        function RenderList(jsonstr) {
+            var str = '';
+            for (var i = 0;i<jsonstr.length;i++) {
+                var a = i + 1;
+                if(mid==jsonstr[i].mid) str += '<tr style="color:#ff9900;">';
+				else str += '<tr>';
+                str += '<td class="ellipsis">';
+                if(a==1) str += '<img src="./images/no1.png">';
+				else if(a==2) str += '<img src="./images/no2.png">';
+				else if(a==3) str += '<img src="./images/no3.png">';
+				else str += '<span>'+a+'</span>';
+				str += '</td>';
+				str += '<td class="ellipsis">';
+                str += '<span class="center" style="margin-left: 10px;">' + jsonstr[i].userid + '</span>';
+                str += '</td>';
+                str += '<td class="ellipsis">' + jsonstr[i].score + '</td>';
+                str += '<td class="ellipsis">'+current(jsonstr[i].jointime)+'</td>';
+                str += ' </tr>';
+            }
+            return str;
+        }
+		function current(data) {
+			var date = new Date(data);
+			var YY = date.getFullYear() + "-";
+			var MM =
+			  (date.getMonth() + 1 < 10
+				? "0" + (date.getMonth() + 1)
+				: date.getMonth() + 1) + "-";
+			var DD = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+			var hh =
+			  (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) +
+			  ":";
+			var mm =
+			  (date.getMinutes() < 10
+				? "0" + date.getMinutes()
+				: date.getMinutes()) + ":";
+			var ss =
+			  date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+			return YY + MM + DD + " " + hh + mm + ss;
+		}
+
+    })(jQuery)
+</script>
+
+
+</body>
+
+</html>
