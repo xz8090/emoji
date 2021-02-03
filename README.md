@@ -1,4 +1,4 @@
-## 合成大西瓜
-被西瓜整崩溃了,改动了一下代码，点击右上角的宝箱会切换水果。破坏游戏体验，谨慎尝试。
-分支「default」是未改动代码
-> ![image](https://github.com/JennerTien/bigwaterlemon/blob/main/1611557925872957.gif)
+## 合成大西瓜改编版
+支持实时排行榜，需要自定义接口和数据库。
+> ![image](https://github.com/xz8090/emoji/tree/master/%E6%95%88%E6%9E%9C%E5%9B%BE/微信图片_20210203191015.jpg)
+> ![image](https://github.com/xz8090/emoji/tree/master/%E6%95%88%E6%9E%9C%E5%9B%BE/微信图片_20210203191023.jpg)
